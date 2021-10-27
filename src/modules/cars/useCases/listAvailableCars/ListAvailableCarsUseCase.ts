@@ -22,6 +22,7 @@ class ListAvailableCarsUseCase {
       name,
       category_id
     );
+    
     return cars;
   }
 }
