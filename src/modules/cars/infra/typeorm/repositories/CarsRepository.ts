@@ -4,6 +4,7 @@ import { ICreateCarDTO } from "@modules/cars/dtos/ICreateCarDTO";
 import { ICarsRepository } from "@modules/cars/repositories/ICarsRepository";
 
 import { Car } from "../entities/Car";
+import { AppError } from "@shared/errors/AppError";
 
 class CarsRepository implements ICarsRepository {
   private repository: Repository<Car>;
@@ -13,6 +14,7 @@ class CarsRepository implements ICarsRepository {
   }
 
   async create({
+    id,
     name,
     description,
     brand,
@@ -22,6 +24,7 @@ class CarsRepository implements ICarsRepository {
     license_plate,
   }: ICreateCarDTO): Promise<Car> {
     const car = this.repository.create({
+      id,
       name,
       description,
       brand,
@@ -34,6 +37,10 @@ class CarsRepository implements ICarsRepository {
     await this.repository.save(car);
 
     return car;
+  }
+
+  async list(): Promise<Car[]> {
+    return await this.repository.find();
   }
 
   async findById(id: string): Promise<Car> {
@@ -51,11 +58,14 @@ class CarsRepository implements ICarsRepository {
     name?: string,
     category_id?: string
   ): Promise<Car[]> {
+
     const carsQuery = this.repository
       .createQueryBuilder("c")
       .where("available = :available", { available: true });
 
-    console.log(`Aqui ${category_id}`, brand, name);
+    if (!carsQuery) {
+      throw new AppError("Cannot find cars exists");
+    }
 
     if (brand) {
       carsQuery.andWhere("brand = :brand", { brand });
