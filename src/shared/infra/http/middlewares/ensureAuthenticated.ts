@@ -1,7 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import { verify } from "jsonwebtoken";
 
-import { UsersRepository } from "@modules/accounts/infra/typeorm/repositories/UsersRepository";
+import auth from "@config/auth";
+import { UsersTokensRepository } from "@modules/accounts/infra/typeorm/repositories/UsersTokensRepository";
 import { AppError } from "@shared/errors/AppError";
 
 interface IPlayload {
@@ -14,6 +15,7 @@ export async function ensureAuthenticated(
   next: NextFunction
 ): Promise<void> {
   const authHeader = request.headers.authorization;
+  const usersTokensRepository = new UsersTokensRepository();
 
   if (!authHeader) {
     throw new AppError("Token missing", 401);
@@ -24,11 +26,13 @@ export async function ensureAuthenticated(
   try {
     const { sub: user_id } = verify(
       token,
-      "0b32a969c1936aec0e0c6ebee1ae3aec"
+      auth.secret_refresh_token
     ) as IPlayload;
 
-    const usersRepository = new UsersRepository();
-    const user = await usersRepository.findById(user_id);
+    const user = await usersTokensRepository.findByUserIdAndRefreshToken(
+      user_id,
+      token
+    );
 
     if (!user) {
       throw new AppError("User is not exists.", 401);
