@@ -1,15 +1,14 @@
 import { Router } from "express";
+import multer from "multer";
+
+import uploadConfig from "@config/upload";
+import { CreateCarController } from "@modules/cars/useCases/createCar/CreateCarController";
+import { CreateCarSpecificationController } from "@modules/cars/useCases/createCarSpecification/CreateCarSpecificationController";
+import { ListAvailableCarsController } from "@modules/cars/useCases/listAvailableCars/ListAvailableCarsController";
+import { UploadCarImageController } from "@modules/cars/useCases/uploadImage/UploadCarImageController";
 
 import { ensureAdmin } from "../middlewares/enshureAdmin";
 import { ensureAuthenticated } from "../middlewares/ensureAuthenticated";
-
-import { CreateCarController } from "@modules/cars/useCases/createCar/CreateCarController";
-import { ListAvailableCarsController } from "@modules/cars/useCases/listAvailableCars/ListAvailableCarsController";
-import { CreateCarSpecificationController } from "@modules/cars/useCases/createCarSpecification/CreateCarSpecificationController";
-import { UploadCarImageController } from "@modules/cars/useCases/uploadImage/UploadCarImageController";
-
-import multer from "multer";
-import uploadConfig from "@config/upload";
 
 const carsRoutes = Router();
 
@@ -18,7 +17,7 @@ const listAvailableCarsController = new ListAvailableCarsController();
 const createCarSpecificationController = new CreateCarSpecificationController();
 const uploadCarImageController = new UploadCarImageController();
 
-const upload = multer(uploadConfig.upload("./tmp/cars"));
+const upload = multer(uploadConfig);
 
 carsRoutes.post(
   "/",
@@ -35,6 +34,6 @@ carsRoutes.post(
 
 carsRoutes.get("/available", listAvailableCarsController.handle);
 
-carsRoutes.post("/specifications/:id", createCarSpecificationController.handle)
+carsRoutes.post("/specifications/:id", createCarSpecificationController.handle);
 
 export { carsRoutes };
